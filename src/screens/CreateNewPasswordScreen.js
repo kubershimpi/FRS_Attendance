@@ -12,10 +12,10 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { updatePasswordInDB } from "../utils/DummyDB"; // Import the update function
+// HERO FIX: Ensure the import uses curly braces for named exports
+import { updatePasswordInDB } from "../utils/DummyDB";
 
 export default function CreateNewPasswordScreen({ route, navigation }) {
-  // Getting the userId from the previous OTP screen to know whose password to 'update'
   const userId = route.params?.userId || "";
 
   const [newPassword, setNewPassword] = useState("");
@@ -23,16 +23,14 @@ export default function CreateNewPasswordScreen({ route, navigation }) {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // Validation Logic (Dynamic Checks)
   const isLongEnough = newPassword.length >= 8;
   const hasSpecialChar = /[0-9!@#$%^&*(),.?":{}|<>]/.test(newPassword);
-  const isDifferent = newPassword !== "password123"; // Simulating a check against old pass
+  const isDifferent = newPassword !== "password123";
   const passwordsMatch = newPassword === confirmPassword && newPassword !== "";
 
-  // Inside your component:
   const handleResetPassword = () => {
     if (isLongEnough && hasSpecialChar && isDifferent && passwordsMatch) {
-      // ACTUALLY UPDATE THE DATABASE
+      // Call the function from DummyDB
       const success = updatePasswordInDB(userId, newPassword);
 
       if (success) {
@@ -55,7 +53,6 @@ export default function CreateNewPasswordScreen({ route, navigation }) {
         style={styles.container}
       >
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* --- HEADER --- */}
           <View style={styles.header}>
             <TouchableOpacity
               onPress={() => navigation.goBack()}
@@ -67,7 +64,6 @@ export default function CreateNewPasswordScreen({ route, navigation }) {
             <View style={styles.placeholder} />
           </View>
 
-          {/* --- ICON & TITLE --- */}
           <View style={styles.iconSection}>
             <View style={styles.iconCircle}>
               <Ionicons name="shield-checkmark" size={45} color="#0044CC" />
@@ -78,7 +74,6 @@ export default function CreateNewPasswordScreen({ route, navigation }) {
             </Text>
           </View>
 
-          {/* --- INPUTS --- */}
           <View style={styles.form}>
             <View style={styles.inputWrapper}>
               <Ionicons
@@ -127,7 +122,6 @@ export default function CreateNewPasswordScreen({ route, navigation }) {
             </View>
           </View>
 
-          {/* --- VALIDATION CHECKLIST --- */}
           <View style={styles.checklist}>
             <ValidationItem
               label="At least 8 characters"
@@ -138,16 +132,16 @@ export default function CreateNewPasswordScreen({ route, navigation }) {
               isValid={hasSpecialChar}
             />
             <ValidationItem
-              label="Must be different from old password"
+              label="Different from old password"
               isValid={isDifferent}
             />
           </View>
 
-          {/* --- SUBMIT BUTTON --- */}
           <TouchableOpacity
             style={[
               styles.primaryButton,
-              !(passwordsMatch && isLongEnough) && styles.buttonDisabled,
+              !(passwordsMatch && isLongEnough && hasSpecialChar) &&
+                styles.buttonDisabled,
             ]}
             onPress={handleResetPassword}
           >
@@ -159,7 +153,6 @@ export default function CreateNewPasswordScreen({ route, navigation }) {
   );
 }
 
-// Sub-component for the checklist items
 const ValidationItem = ({ label, isValid }) => (
   <View style={styles.checkItem}>
     <Ionicons
@@ -230,10 +223,6 @@ const styles = StyleSheet.create({
     height: 55,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#0044CC",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
     elevation: 4,
     marginBottom: 20,
   },

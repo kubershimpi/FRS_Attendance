@@ -1,5 +1,6 @@
 import moment from "moment";
 
+// 1. THE STORAGE
 export let UsersDatabase = {
   "ramesh@mindbox.com": {
     password: "password123",
@@ -15,36 +16,29 @@ export let UsersDatabase = {
   },
 };
 
-/**
- * HERO LOGIC:
- * We create a function that returns the logs.
- * This ensures that every time the app calls the API,
- * it calculates the dates relative to "Right Now".
- */
 const getDynamicLogs = (userId) => {
   const today = moment().format("YYYY-MM-DD");
   const yesterday = moment().subtract(1, "days").format("YYYY-MM-DD");
 
-  // This simulates a real company database.
-  // If a user hasn't walked past the FRS camera, these stay null.
   return [
     {
       date: today,
       dayName: moment().format("dddd"),
-      checkIn: null, // Dynamic: Empty until FRS detects face
+      checkIn: null,
       checkOut: null,
       status: "Waiting...",
     },
     {
       date: yesterday,
       dayName: moment().subtract(1, "days").format("dddd"),
-      checkIn: null, // Dynamic: Will show --:-- unless you add a time here
+      checkIn: null,
       checkOut: null,
       status: "No Record",
     },
   ];
 };
 
+// 2. THE API LAYER
 export const mockApi = {
   getHomeStatus: (userId) => {
     return new Promise((resolve) => {
@@ -52,25 +46,34 @@ export const mockApi = {
         const cleanId = userId.toLowerCase().trim();
         const user = UsersDatabase[cleanId];
         const logs = getDynamicLogs(cleanId);
-
         resolve({
           success: true,
           employee: user.profile,
-          today: logs[0], // Returns the first item (Today)
+          today: logs[0],
         });
       }, 400);
     });
   },
-
   getAttendanceHistory: (userId) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         const cleanId = userId.toLowerCase().trim();
         resolve({
           success: true,
-          logs: getDynamicLogs(cleanId), // Returns both Today and Yesterday
+          logs: getDynamicLogs(cleanId),
         });
       }, 400);
     });
   },
+};
+
+// 3. THE UPDATE FUNCTION (Named Export)
+export const updatePasswordInDB = (userId, newPassword) => {
+  const cleanId = userId.toLowerCase().trim();
+  if (UsersDatabase[cleanId]) {
+    UsersDatabase[cleanId].password = newPassword;
+    console.log(`[DB] Password updated for ${cleanId}: ${newPassword}`);
+    return true;
+  }
+  return false;
 };
